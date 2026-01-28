@@ -1,0 +1,180 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="2575.3">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
+  </style>
+</head>
+<body>
+<p class="p1">&lt;!DOCTYPE html&gt;</p>
+<p class="p1">&lt;html lang="ko"&gt;</p>
+<p class="p1">&lt;head&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;meta charset="UTF-8"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;title&gt;프랜차이즈 메뉴판 모음&lt;/title&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;script src="https://cdn.tailwindcss.com"&gt;&lt;/script&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;style&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.bottom-sheet { transform: translateY(100%); transition: transform 0.3s ease-out; }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.bottom-sheet.active { transform: translateY(0); }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.no-scrollbar::-webkit-scrollbar { display: none; }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/style&gt;</p>
+<p class="p1">&lt;/head&gt;</p>
+<p class="p1">&lt;body class="bg-gray-100 font-sans"&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;header class="bg-white sticky top-0 z-40 border-b p-4"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;h1 class="text-xl font-extrabold text-red-600 italic"&gt;MENU HUB&lt;/h1&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div id="category-filter" class="flex gap-2 mt-3 overflow-x-auto no-scrollbar text-sm"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;button onclick="filterBrand('all')" class="bg-black text-white px-4 py-1.5 rounded-full shrink-0"&gt;전체&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;button onclick="filterBrand('cafe')" class="bg-white border px-4 py-1.5 rounded-full shrink-0 text-gray-600"&gt;☕ 카페&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;button onclick="filterBrand('fastfood')" class="bg-white border px-4 py-1.5 rounded-full shrink-0 text-gray-600"&gt;🍔 패스트푸드&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;button onclick="filterBrand('korean')" class="bg-white border px-4 py-1.5 rounded-full shrink-0 text-gray-600"&gt;🍲 한식/뷔페&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/header&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;main id="app" class="p-4 space-y-8 pb-24"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/main&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div id="overlay" onclick="closeSheet()" class="fixed inset-0 bg-black/50 hidden z-50"&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div id="bottom-sheet" class="fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl z-50 bottom-sheet max-h-[85vh] overflow-y-auto p-6"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mb-6"&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div id="sheet-content"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;script&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>// 실제 운영 시에는 fetch('data.json')으로 데이터를 불러오세요.</p>
+<p class="p1"><span class="Apple-converted-space">        </span>let data = {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>"franchises": [</p>
+<p class="p1"><span class="Apple-converted-space">                </span>{</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"id": "gongcha",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"name": "공차",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"category": "cafe",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"items": [</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>{</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>"id": "gc_01",</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>"name": "블랙 밀크티",</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>"base_price": 4700,</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>"tags": ["베스트", "밀크티", "카페인"],</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>"option_groups": [</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>{ "group_name": "사이즈", "options": [{ "name": "Large", "extra": 0 }, { "name": "Jumbo", "extra": 1200 }] },</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>{ "group_name": "토핑", "options": [{ "name": "펄 추가", "extra": 500 }, { "name": "밀크폼 추가", "extra": 500 }] },</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>{ "group_name": "당도", "options": [{ "name": "50%(기본)", "extra": 0 }, { "name": "스테비아 변경", "extra": 500 }] }</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>]</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>]</p>
+<p class="p1"><span class="Apple-converted-space">                </span>},</p>
+<p class="p1"><span class="Apple-converted-space">                </span>{</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"id": "mcdonalds",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"name": "맥도날드",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"category": "fastfood",</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>"items": [</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>{</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>"id": "mc_01",</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>"name": "빅맥",</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>"base_price": 5500,</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>"tags": ["베스트", "소고기", "맥런치"],</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>"option_groups": [</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>{ "group_name": "세트 선택", "options": [{ "name": "단품", "extra": 0 }, { "name": "세트", "extra": 1700 }] }</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>]</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>]</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>]</p>
+<p class="p1"><span class="Apple-converted-space">        </span>};</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>function renderApp(filter = 'all') {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const container = document.getElementById('app');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>container.innerHTML = '';</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>data.franchises.forEach(brand =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if(filter !== 'all' &amp;&amp; brand.category !== filter) return;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>const section = document.createElement('section');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>section.innerHTML = `</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;h2 class="text-lg font-bold mb-3 flex items-center gap-2"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;span class="w-1 h-5 bg-red-600 rounded"&gt;&lt;/span&gt; ${brand.name}</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/h2&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="grid grid-cols-1 gap-3"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>${brand.items.map(item =&gt; `</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;div onclick="openSheet('${brand.id}', '${item.id}')" class="bg-white p-4 rounded-2xl shadow-sm flex justify-between items-center active:scale-95 transition"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                    </span>&lt;div class="flex gap-1 mb-1"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                        </span>${item.tags.map(t =&gt; `&lt;span class="text-[10px] bg-red-50 text-red-600 px-1.5 py-0.5 rounded font-bold"&gt;#${t}&lt;/span&gt;`).join('')}</p>
+<p class="p1"><span class="Apple-converted-space">                                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                    </span>&lt;h3 class="font-bold"&gt;${item.name}&lt;/h3&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                    </span>&lt;p class="text-gray-400 text-xs mt-1"&gt;옵션 선택 가능&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;div class="text-right"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                    </span>&lt;p class="font-black text-lg"&gt;${item.base_price.toLocaleString()}원&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                    </span>&lt;i class="fa-solid fa-chevron-right text-gray-300 text-sm"&gt;&lt;/i&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>`).join('')}</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>`;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>container.appendChild(section);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>function openSheet(brandId, itemId) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const brand = data.franchises.find(b =&gt; b.id === brandId);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const item = brand.items.find(i =&gt; i.id === itemId);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const content = document.getElementById('sheet-content');</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>content.innerHTML = `</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;h3 class="text-2xl font-black mb-2"&gt;${item.name}&lt;/h3&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div class="flex gap-2 mb-6"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>${item.tags.map(t =&gt; `&lt;span class="text-xs text-gray-400"&gt;#${t}&lt;/span&gt;`).join('')}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div class="space-y-6"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>${item.option_groups.map(group =&gt; `</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;p class="text-sm font-bold text-gray-500 mb-3"&gt;${group.group_name}&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;div class="grid grid-cols-2 gap-2"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>${group.options.map(opt =&gt; `</p>
+<p class="p1"><span class="Apple-converted-space">                                    </span>&lt;button onclick="calculate()" class="border-2 border-gray-100 p-3 rounded-xl text-left focus:border-red-500 focus:bg-red-50 transition"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                        </span>&lt;p class="text-sm font-medium"&gt;${opt.name}&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                        </span>&lt;p class="text-xs text-gray-400"&gt;+${opt.extra.toLocaleString()}원&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                    </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>`).join('')}</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>`).join('')}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div class="mt-8 pt-6 border-t flex justify-between items-center"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;p class="text-xs text-gray-400"&gt;최종 예상 금액&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;p id="total-price" class="text-2xl font-black text-red-600"&gt;${item.base_price.toLocaleString()}원&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;button class="bg-red-600 text-white px-8 py-3 rounded-2xl font-bold shadow-lg shadow-red-200"&gt;기프티콘 구매&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>`;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('overlay').classList.remove('hidden');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('bottom-sheet').classList.add('active');</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>function closeSheet() {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('overlay').classList.add('hidden');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('bottom-sheet').classList.remove('active');</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>function filterBrand(cat) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>renderApp(cat);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>renderApp();</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/script&gt;</p>
+<p class="p1">&lt;/body&gt;</p>
+<p class="p1">&lt;/html&gt;</p>
+</body>
+</html>
