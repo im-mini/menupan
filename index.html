@@ -7,7 +7,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     
     <!-- SEO 핵심 메타태그 -->
-    <title>메뉴허브 - 공차, 맥도날드, 스타벅스 메뉴 가격 비교 | 프랜차이즈 메뉴판</title>
+    <title>메뉴빤 - 공차, 맥도날드, 스타벅스 메뉴 가격 비교 | 프랜차이즈 메뉴판</title>
     <meta name="description" content="공차 밀크티, 맥도날드 빅맥, 스타벅스 아메리카노 등 인기 프랜차이즈 메뉴 가격을 한눈에 비교하세요. 옵션별 실시간 가격 계산, 최신 메뉴 정보 제공.">
     <meta name="keywords" content="공차 메뉴, 공차 가격, 맥도날드 메뉴, 맥도날드 가격, 스타벅스 메뉴, 스타벅스 가격, 프랜차이즈 메뉴, 메뉴 가격 비교, 샤브올데이 가격, 서브웨이 메뉴, 메가커피 메뉴, MGC커피">
     
@@ -19,25 +19,25 @@
     <!-- 오픈 그래프 (Open Graph) - 소셜 미디어 공유용 -->
     <meta property="og:locale" content="ko_KR">
     <meta property="og:type" content="website">
-    <meta property="og:title" content="메뉴허브 - 프랜차이즈 메뉴 가격 비교">
+    <meta property="og:title" content="메뉴빤 - 프랜차이즈 메뉴 가격 비교">
     <meta property="og:description" content="공차, 맥도날드, 스타벅스 등 인기 프랜차이즈 메뉴와 가격을 한눈에 비교하세요.">
     <meta property="og:url" content="https://im-mini.github.io/menupan/">
-    <meta property="og:site_name" content="메뉴허브">
+    <meta property="og:site_name" content="메뉴빤">
     
     <!-- 트위터 카드 -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="메뉴허브 - 프랜차이즈 메뉴 가격 비교">
+    <meta name="twitter:title" content="메뉴빤 - 프랜차이즈 메뉴 가격 비교">
     <meta name="twitter:description" content="공차, 맥도날드, 스타벅스 등 인기 프랜차이즈 메뉴와 가격을 한눈에 비교하세요.">
     
     <!-- 제작자 정보 -->
-    <meta name="author" content="메뉴허브">
+    <meta name="author" content="메뉴빤">
     
     <!-- 구조화된 데이터 (JSON-LD) - 웹사이트 정보 -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "WebSite",
-      "name": "메뉴허브",
+      "name": "메뉴빤",
       "url": "https://im-mini.github.io/menupan/",
       "description": "프랜차이즈 메뉴와 가격을 한눈에 비교할 수 있는 서비스",
       "potentialAction": {
@@ -53,7 +53,7 @@
     {
       "@context": "https://schema.org",
       "@type": "Organization",
-      "name": "메뉴허브",
+      "name": "메뉴빤",
       "url": "https://im-mini.github.io/menupan/",
       "description": "프랜차이즈 메뉴 가격 비교 서비스"
     }
@@ -147,287 +147,12 @@
         <div id="sheet-content" class="px-6 pb-6"></div>
     </div>
 
+    <script src="data.js"></script>
     <script>
         /**
-         * 메뉴허브 - 프랜차이즈 메뉴 가격 비교 서비스
+         * 메뉴빤 - 프랜차이즈 메뉴 가격 비교 서비스
          * 옵션 선택에 따라 실시간으로 가격이 변경됩니다
          */
-
-        // 메뉴 데이터 (직접 내장)
-        const menuData = {
-          "franchises": [
-            {
-              "id": "gongcha",
-              "name": "공차",
-              "category": "cafe",
-              "last_updated": "2026-01-29",
-              "items": [
-                {
-                  "id": "gc_01",
-                  "name": "블랙 밀크티",
-                  "base_price": 4700,
-                  "tags": ["베스트", "밀크티", "카페인"],
-                  "option_groups": [
-                    {
-                      "group_name": "사이즈",
-                      "required": true,
-                      "options": [
-                        { "name": "Large", "extra": 0, "default": true },
-                        { "name": "Jumbo", "extra": 1200 }
-                      ]
-                    },
-                    {
-                      "group_name": "토핑",
-                      "required": false,
-                      "options": [
-                        { "name": "없음", "extra": 0, "default": true },
-                        { "name": "펄 추가", "extra": 500 },
-                        { "name": "밀크폼 추가", "extra": 500 }
-                      ]
-                    },
-                    {
-                      "group_name": "당도",
-                      "required": true,
-                      "options": [
-                        { "name": "50%(기본)", "extra": 0, "default": true },
-                        { "name": "스테비아 변경", "extra": 500 }
-                      ]
-                    }
-                  ]
-                },
-                {
-                  "id": "gc_02",
-                  "name": "타로 밀크티",
-                  "base_price": 5200,
-                  "tags": ["인기", "밀크티", "카페인"],
-                  "option_groups": [
-                    {
-                      "group_name": "사이즈",
-                      "required": true,
-                      "options": [
-                        { "name": "Large", "extra": 0, "default": true },
-                        { "name": "Jumbo", "extra": 1200 }
-                      ]
-                    },
-                    {
-                      "group_name": "토핑",
-                      "required": false,
-                      "options": [
-                        { "name": "없음", "extra": 0, "default": true },
-                        { "name": "펄 추가", "extra": 500 },
-                        { "name": "코코넛 젤리", "extra": 500 }
-                      ]
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "mcdonalds",
-              "name": "맥도날드",
-              "category": "fastfood",
-              "last_updated": "2026-01-29",
-              "items": [
-                {
-                  "id": "mc_01",
-                  "name": "빅맥",
-                  "base_price": 5500,
-                  "tags": ["베스트", "소고기", "맥런치"],
-                  "option_groups": [
-                    {
-                      "group_name": "세트 선택",
-                      "required": true,
-                      "options": [
-                        { "name": "단품", "extra": 0, "default": true },
-                        { "name": "세트", "extra": 1700 }
-                      ]
-                    }
-                  ]
-                },
-                {
-                  "id": "mc_02",
-                  "name": "맥스파이시 상하이버거",
-                  "base_price": 5800,
-                  "tags": ["신제품", "치킨", "매운맛"],
-                  "option_groups": [
-                    {
-                      "group_name": "세트 선택",
-                      "required": true,
-                      "options": [
-                        { "name": "단품", "extra": 0, "default": true },
-                        { "name": "세트", "extra": 1700 }
-                      ]
-                    }
-                  ]
-                },
-                {
-                  "id": "mc_03",
-                  "name": "맥너겟",
-                  "base_price": 4500,
-                  "tags": ["사이드", "치킨"],
-                  "option_groups": [
-                    {
-                      "group_name": "수량",
-                      "required": true,
-                      "options": [
-                        { "name": "6조각", "extra": 0, "default": true },
-                        { "name": "10조각", "extra": 2000 }
-                      ]
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "starbucks",
-              "name": "스타벅스",
-              "category": "cafe",
-              "last_updated": "2026-01-29",
-              "items": [
-                {
-                  "id": "sb_01",
-                  "name": "아메리카노",
-                  "base_price": 4500,
-                  "tags": ["베스트", "커피", "카페인"],
-                  "option_groups": [
-                    {
-                      "group_name": "사이즈",
-                      "required": true,
-                      "options": [
-                        { "name": "톨(355ml)", "extra": 0, "default": true },
-                        { "name": "그란데(473ml)", "extra": 500 },
-                        { "name": "벤티(591ml)", "extra": 1000 }
-                      ]
-                    },
-                    {
-                      "group_name": "온도",
-                      "required": true,
-                      "options": [
-                        { "name": "HOT", "extra": 0, "default": true },
-                        { "name": "ICE", "extra": 0 }
-                      ]
-                    },
-                    {
-                      "group_name": "샷 추가",
-                      "required": false,
-                      "options": [
-                        { "name": "없음", "extra": 0, "default": true },
-                        { "name": "1샷 추가", "extra": 600 },
-                        { "name": "2샷 추가", "extra": 1200 }
-                      ]
-                    }
-                  ]
-                },
-                {
-                  "id": "sb_02",
-                  "name": "카페 라떼",
-                  "base_price": 5000,
-                  "tags": ["베스트", "커피", "우유"],
-                  "option_groups": [
-                    {
-                      "group_name": "사이즈",
-                      "required": true,
-                      "options": [
-                        { "name": "톨(355ml)", "extra": 0, "default": true },
-                        { "name": "그란데(473ml)", "extra": 500 },
-                        { "name": "벤티(591ml)", "extra": 1000 }
-                      ]
-                    },
-                    {
-                      "group_name": "온도",
-                      "required": true,
-                      "options": [
-                        { "name": "HOT", "extra": 0, "default": true },
-                        { "name": "ICE", "extra": 0 }
-                      ]
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "shabu-allday",
-              "name": "샤브올데이",
-              "category": "korean",
-              "last_updated": "2026-01-29",
-              "items": [
-                {
-                  "id": "sa_01",
-                  "name": "무한리필 이용권",
-                  "base_price": 18900,
-                  "tags": ["무한리필", "인기", "가족모임"],
-                  "option_groups": [
-                    {
-                      "group_name": "시간대",
-                      "required": true,
-                      "options": [
-                        { "name": "평일 점심", "extra": 0, "default": true },
-                        { "name": "평일 저녁", "extra": 5000 },
-                        { "name": "주말/공휴일", "extra": 5000 }
-                      ]
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "subway",
-              "name": "서브웨이",
-              "category": "fastfood",
-              "last_updated": "2026-01-29",
-              "items": [
-                {
-                  "id": "sw_01",
-                  "name": "이탈리안 비엠티",
-                  "base_price": 6700,
-                  "tags": ["베스트", "샌드위치", "든든한"],
-                  "option_groups": [
-                    {
-                      "group_name": "빵 길이",
-                      "required": true,
-                      "options": [
-                        { "name": "15cm", "extra": 0, "default": true },
-                        { "name": "30cm", "extra": 5000 }
-                      ]
-                    },
-                    {
-                      "group_name": "세트 선택",
-                      "required": true,
-                      "options": [
-                        { "name": "단품", "extra": 0, "default": true },
-                        { "name": "세트", "extra": 2000 }
-                      ]
-                    }
-                  ]
-                },
-                {
-                  "id": "sw_02",
-                  "name": "터키 베이컨 아보카도",
-                  "base_price": 7200,
-                  "tags": ["신메뉴", "샌드위치", "아보카도"],
-                  "option_groups": [
-                    {
-                      "group_name": "빵 길이",
-                      "required": true,
-                      "options": [
-                        { "name": "15cm", "extra": 0, "default": true },
-                        { "name": "30cm", "extra": 5000 }
-                      ]
-                    },
-                    {
-                      "group_name": "세트 선택",
-                      "required": true,
-                      "options": [
-                        { "name": "단품", "extra": 0, "default": true },
-                        { "name": "세트", "extra": 2000 }
-                      ]
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        };
 
         // 전역 변수
         let currentCategory = 'all';
