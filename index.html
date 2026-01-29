@@ -133,6 +133,10 @@
                     🍲 한식/뷔페
                 </button>
             </div>
+
+            <!-- 브랜드 탭 -->
+            <div id="brand-tabs" class="flex gap-2 mt-2 overflow-x-auto no-scrollbar pb-2 px-4 bg-white border-b sticky top-[130px] z-30 hidden">
+            </div>
         </div>
     </header>
 
@@ -166,6 +170,7 @@
          */
         function renderApp(filter = 'all') {
             const container = document.getElementById('app');
+            const brandTabs = document.getElementById('brand-tabs');
             container.innerHTML = '';
             
             // 카테고리별로 브랜드 필터링
@@ -184,9 +189,23 @@
                 return;
             }
 
+            // 브랜드 탭 생성 및 표시
+            if (filteredFranchises.length > 1) {
+                brandTabs.classList.remove('hidden');
+                brandTabs.innerHTML = filteredFranchises.map(brand => `
+                    <button onclick="document.getElementById('section-${brand.id}').scrollIntoView({behavior: 'smooth', block: 'start'})"
+                            class="px-3 py-1.5 bg-gray-100 rounded-lg text-xs font-bold whitespace-nowrap">
+                        ${brand.name}
+                    </button>
+                `).join('');
+            } else {
+                brandTabs.classList.add('hidden');
+            }
+
             // 각 브랜드 섹션 렌더링
             filteredFranchises.forEach(brand => {
                 const section = document.createElement('section');
+                section.id = `section-${brand.id}`;
                 section.className = 'bg-white rounded-2xl shadow-sm p-5 mb-4';
                 
                 section.innerHTML = `
