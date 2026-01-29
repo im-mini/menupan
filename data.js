@@ -1,4 +1,4 @@
-{
+const menuData = {
           "franchises": [
             {
               "id": "gongcha",
