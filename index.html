@@ -193,8 +193,8 @@
             if (filteredFranchises.length > 1) {
                 brandTabs.classList.remove('hidden');
                 brandTabs.innerHTML = filteredFranchises.map(brand => `
-                    <button onclick="document.getElementById('section-${brand.id}').scrollIntoView({behavior: 'smooth', block: 'start'})"
-                            class="px-3 py-1.5 bg-gray-100 rounded-lg text-xs font-bold whitespace-nowrap">
+                    <button onclick="scrollToBrand(this, 'section-${brand.id}')"
+                            class="brand-tab-btn px-3 py-1.5 bg-gray-100 rounded-lg text-xs font-bold whitespace-nowrap transition-all">
                         ${brand.name}
                     </button>
                 `).join('');
@@ -206,7 +206,7 @@
             filteredFranchises.forEach(brand => {
                 const section = document.createElement('section');
                 section.id = `section-${brand.id}`;
-                section.className = 'bg-white rounded-2xl shadow-sm p-5 mb-4';
+                section.className = 'bg-white rounded-2xl shadow-sm p-5 mb-4 scroll-mt-[180px]'
                 
                 section.innerHTML = `
                     <!-- 브랜드 헤더 -->
@@ -256,6 +256,21 @@
                 
                 container.appendChild(section);
             });
+        }
+
+        // 브랜드 탭 버튼 클릭
+        function scrollToBrand(btn, sectionId) {
+            // 모든 버튼 원래대로
+            document.querySelectorAll('.brand-tab-btn').forEach(b => {
+                b.classList.replace('bg-black', 'bg-gray-100');
+                b.classList.replace('text-white', 'text-gray-900');
+            });
+            // 클릭한 버튼 강조
+            btn.classList.replace('bg-gray-100', 'bg-black');
+            btn.classList.add('text-white');
+        
+            // 이동
+            document.getElementById(sectionId).scrollIntoView({behavior: 'smooth', block: 'start'});
         }
 
         /**
