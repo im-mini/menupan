@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <!-- 메인 페이지 -->
+  <url>
+    <loc>https://im-mini.github.io/menupan/</loc>
+    <lastmod>2026-01-29</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+  
+  <!-- 공차 페이지 -->
+  <url>
+    <loc>https://im-mini.github.io/menupan/gongcha/</loc>
+    <lastmod>2026-01-29</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <!-- 맥도날드 페이지 -->
+  <url>
+    <loc>https://im-mini.github.io/menupan/mcdonalds/</loc>
+    <lastmod>2026-01-29</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <!-- 스타벅스 페이지 -->
+  <url>
+    <loc>https://im-mini.github.io/menupan/starbucks/</loc>
+    <lastmod>2026-01-29</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <!-- 샤브올데이 페이지 -->
+  <url>
+    <loc>https://im-mini.github.io/menupan/shabu-allday/</loc>
+    <lastmod>2026-01-29</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <!-- 서브웨이 페이지 -->
+  <url>
+    <loc>https://im-mini.github.io/menupan/subway/</loc>
+    <lastmod>2026-01-29</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <!-- 
+    새로운 브랜드 추가시 아래 형식으로 추가:
+    <url>
+      <loc>https://im-mini.github.io/menupan/브랜드ID/</loc>
+      <lastmod>업데이트날짜</lastmod>
+      <changefreq>weekly</changefreq>
+      <priority>0.8</priority>
+    </url>
+  -->
+</urlset>
