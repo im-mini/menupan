@@ -72,6 +72,12 @@
         .bottom-sheet.active { 
             transform: translateY(0); 
         }
+
+        /* 모달(바텀시트) 열릴 때 바디 스크롤 막기 */
+        .body-lock {
+            overflow: hidden;
+            height: 100vh;  /* 바닥에서 더 못 내려가게 */
+        }
         
         /* 스크롤바 숨김 */
         .no-scrollbar::-webkit-scrollbar { 
