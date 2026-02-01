@@ -230,7 +230,10 @@
          class="fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl z-50 bottom-sheet max-h-[85vh] flex flex-col">
         <!-- 상단 핸들 영역 -->
         <div class="pt-4 px-6 pb-2">
-            <div class="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mb-4"></div>
+            <div
+                class="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mb-4 cursor-pointer"
+                onclick="event.stopPropagation(); closeSheet();">
+            </div>
         </div>
     
         <!-- 스크롤 되는 옵션 영역 -->
