@@ -443,6 +443,8 @@ function openSheet(brandId, itemId) {
   const sheet = document.getElementById('bottom-sheet');
   overlay && overlay.classList.remove('hidden');
   sheet && sheet.classList.add('active');
+
+  document.body.classList.add('body-lock');
 }
 
 /**
@@ -576,6 +578,8 @@ function closeSheet() {
   sheet && sheet.classList.remove('active');
   selectedOptions = {};
   countOptions = {};
+
+  document.body.classList.remove('body-lock');
 }
 
 /**
