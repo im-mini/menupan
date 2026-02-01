@@ -5,7 +5,7 @@
  */
 
 /**
- * @typedef {'cafe' | 'fastfood' | 'pizza' | 'chikin' | 'bunsik' | 'korean' | 'salad' | 'chinise' | 'buffet' | 'english' | 'japanese'} Category
+ * @typedef {'cafe' | 'fastfood' | 'pizza' | 'chikin' | 'bunsik' | 'korean' | 'salad' | 'chinise' | 'buffet' | 'english' | 'japanese' | 'other'} Category
  */
 
 /**
@@ -57,12 +57,14 @@
  */
 
 /** @type {MenuData} */
-const menuData = { 
-  franchises: [] 
+const menuData = {
+  franchises: []
 };
 
 let currentCategory = 'all';
 let currentSearchQuery = '';
+let currentBrandId = null; // ✅ 현재 선택된 브랜드 ID
+
 /** @type {Record<string, string>} */
 let selectedOptions = {}; // { group_name: option_name }
 /** @type {Record<string, number>} */
@@ -88,7 +90,7 @@ function highlightText(text, query) {
 }
 
 /**
- * 검색 핸들러
+ * 검색 핸들러 (헤더 input에서 oninput으로 호출)
  * @param {string} query
  */
 function handleSearch(query) {
@@ -134,20 +136,35 @@ function renderApp(filter = 'all', searchQuery = '') {
   const brandTabs = document.getElementById('brand-tabs');
   if (!container) return;
 
+  currentCategory = filter;
   container.innerHTML = '';
 
-  // 카테고리 필터링
+  // 1) 카테고리 기준으로 브랜드 필터
   let filteredFranchises = menuData.franchises.filter(
     (brand) => filter === 'all' || brand.category === filter
   );
 
-  // 검색어 필터링
-  if (searchQuery) {
+  const isSearchMode = !!searchQuery;
+
+  /**
+   *  검색 모드일 때: 여러 브랜드 + 여러 메뉴 섞여서 보여줌 (기존 방식)
+   *  검색이 아닐 때: currentBrandId 에 해당하는 브랜드 하나만 보여줌
+   */
+
+  if (isSearchMode) {
+    // ✅ 검색 모드: 브랜드 탭 숨김 & multi-brand 결과
+    if (brandTabs) {
+      brandTabs.classList.add('hidden');
+      brandTabs.innerHTML = '';
+    }
+
     filteredFranchises = filteredFranchises
       .map((brand) => {
+        // 브랜드명이 검색어와 매칭되면 메뉴 전체 노출
         if (brand.name.toLowerCase().includes(searchQuery)) {
           return brand;
         }
+        // 아니면 메뉴 단위로 필터링
         const matchedItems = brand.items.filter((item) =>
           isItemMatchSearch(item, brand.name, searchQuery)
         );
@@ -157,6 +174,39 @@ function renderApp(filter = 'all', searchQuery = '') {
         return null;
       })
       .filter((brand) => brand !== null);
+  } else {
+    // ✅ 일반 모드: 브랜드 하나만 보여주기
+
+    // 선택된 브랜드가 없거나, 현재 카테고리에 없는 브랜드면
+    // 필터링된 브랜드 중 첫 번째로 자동 선택
+    if (!currentBrandId || !filteredFranchises.some(b => b.id === currentBrandId)) {
+      currentBrandId = filteredFranchises[0]?.id || null;
+    }
+
+    // 브랜드 탭 렌더링
+    if (brandTabs) {
+      if (filteredFranchises.length > 0) {
+        brandTabs.classList.remove('hidden');
+        brandTabs.innerHTML = filteredFranchises.map(brand => `
+          <button
+            onclick="selectBrand('${brand.id}')"
+            class="brand-tab-btn px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all
+                   ${brand.id === currentBrandId ? 'bg-black text-white' : 'bg-gray-100 text-gray-900'}">
+            ${brand.name}
+          </button>
+        `).join('');
+      } else {
+        brandTabs.classList.add('hidden');
+        brandTabs.innerHTML = '';
+      }
+    }
+
+    // 실제로 화면에 보여줄 브랜드 하나만 선택
+    if (currentBrandId) {
+      filteredFranchises = filteredFranchises.filter(b => b.id === currentBrandId);
+    } else {
+      filteredFranchises = [];
+    }
   }
 
   // 결과 없음
@@ -174,31 +224,10 @@ function renderApp(filter = 'all', searchQuery = '') {
         }
       </div>
     `;
-    brandTabs && brandTabs.classList.add('hidden');
     return;
   }
 
-  // 브랜드 탭
-  if (brandTabs) {
-    if (filteredFranchises.length > 1 && !searchQuery) {
-      brandTabs.classList.remove('hidden');
-      brandTabs.innerHTML = filteredFranchises
-        .map(
-          (brand) => `
-        <button onclick="scrollToBrand(this, 'section-${brand.id}')"
-                class="brand-tab-btn px-3 py-1.5 bg-gray-100 rounded-lg text-xs font-bold whitespace-nowrap transition-all">
-          ${brand.name}
-        </button>
-      `
-        )
-        .join('');
-    } else {
-      brandTabs.classList.add('hidden');
-      brandTabs.innerHTML = '';
-    }
-  }
-
-  // 브랜드 섹션 렌더링
+  // 브랜드 섹션 렌더링 (검색 모드든 단일 브랜드 모드든 공통)
   filteredFranchises.forEach((brand) => {
     const section = document.createElement('section');
     section.id = `section-${brand.id}`;
@@ -270,23 +299,12 @@ function renderApp(filter = 'all', searchQuery = '') {
 }
 
 /**
- * 브랜드 탭 버튼 클릭
- * @param {HTMLButtonElement} btn
- * @param {string} sectionId
+ * 브랜드 탭 클릭 시 호출
+ * @param {string} brandId
  */
-function scrollToBrand(btn, sectionId) {
-  document.querySelectorAll('.brand-tab-btn').forEach((b) => {
-    b.classList.remove('bg-black', 'text-white');
-    b.classList.add('bg-gray-100', 'text-gray-900');
-  });
-
-  btn.classList.remove('bg-gray-100', 'text-gray-900');
-  btn.classList.add('bg-black', 'text-white');
-
-  const target = document.getElementById(sectionId);
-  if (target) {
-    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
+function selectBrand(brandId) {
+  currentBrandId = brandId;
+  renderApp(currentCategory, currentSearchQuery);
 }
 
 /**
@@ -441,14 +459,13 @@ function openSheet(brandId, itemId) {
 
   const overlay = document.getElementById('overlay');
   const sheet = document.getElementById('bottom-sheet');
-  overlay && overlay.classList.remove('hidden');
-  sheet && sheet.classList.add('active');
 
   if (sheet) {
+    // ✅ 항상 맨 위부터 보이도록
     sheet.scrollTop = 0;
+    sheet.classList.add('active');
   }
-  
-  document.body.classList.add('body-lock');
+  overlay && overlay.classList.remove('hidden');
 }
 
 /**
@@ -582,8 +599,6 @@ function closeSheet() {
   sheet && sheet.classList.remove('active');
   selectedOptions = {};
   countOptions = {};
-
-  document.body.classList.remove('body-lock');
 }
 
 /**
@@ -591,6 +606,8 @@ function closeSheet() {
  */
 function filterByCategory(category, e) {
   currentCategory = category;
+  currentSearchQuery = currentSearchQuery; // 그대로 유지
+  // 카테고리 바뀔 때 브랜드 선택은 renderApp 안에서 자동 정리됨
   renderApp(category, currentSearchQuery);
 
   const buttons = document.querySelectorAll('.category-btn');
@@ -620,9 +637,10 @@ function filterByCategory(category, e) {
  * @returns {Promise<void>}
  */
 async function loadMenuData() {
-  // 실제로 만드는 JSON 파일 이름에 맞춰서 수정하면 됨
+  // 실제로 만드는 JSON 파일 이름들
   const BRAND_IDS = [
     'starbucks'
+    // 'gongcha', 'ediya', ... 이런 식으로 계속 추가
   ];
 
   const promises = BRAND_IDS.map((id) =>
@@ -670,3 +688,17 @@ document.addEventListener('keydown', (e) => {
     closeSheet();
   }
 });
+
+/**
+ * ============================
+ * 전역으로 노출 (HTML inline onclick 용)
+ * ============================
+ */
+window.handleSearch     = handleSearch;
+window.filterByCategory = filterByCategory;
+window.openSheet        = openSheet;
+window.closeSheet       = closeSheet;
+window.increaseCount    = increaseCount;
+window.decreaseCount    = decreaseCount;
+window.selectOption     = selectOption;
+window.selectBrand      = selectBrand;
