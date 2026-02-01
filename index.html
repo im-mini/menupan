@@ -226,11 +226,20 @@
     <div id="overlay" onclick="closeSheet()" class="fixed inset-0 bg-black/50 hidden z-50"></div>
     
     <!-- 바텀시트 (메뉴 상세 정보) -->
-    <div id="bottom-sheet" class="fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl z-50 bottom-sheet max-h-[85vh] overflow-y-auto">
-        <div class="sticky top-0 bg-white pt-4 px-6 pb-2">
+    <div id="bottom-sheet"
+         class="fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl z-50 bottom-sheet max-h-[85vh] flex flex-col">
+        <!-- 상단 핸들 영역 -->
+        <div class="pt-4 px-6 pb-2">
             <div class="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mb-4"></div>
         </div>
-        <div id="sheet-content" class="px-6 pb-6"></div>
+    
+        <!-- 스크롤 되는 옵션 영역 -->
+        <div id="sheet-content" class="flex-1 px-6 pb-4 overflow-y-auto"></div>
+    
+        <!-- 항상 바텀에 고정되는 푸터 영역 -->
+        <div id="sheet-footer" class="border-t px-6 py-4 bg-white">
+            <!-- JS에서 '최종 예상 금액'과 버튼을 채움 -->
+        </div>
     </div>
 </body>
 </html>
