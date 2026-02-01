@@ -1,3 +1,5 @@
+// js/app.js
+
 let menuData = { franchises: [] };
 let currentCategory = 'all';
 let currentSearchQuery = '';
@@ -34,3 +36,35 @@ const BRAND_FILES = [
   'mibundang',
   'shabu-allday'
 ];
+
+// 2) 모든 브랜드 JSON 로드
+async function loadMenuData() {
+  const promises = BRAND_FILES.map(id =>
+    fetch(`data/brand/${id}.json`).then(res => {
+      if (!res.ok) {
+        console.warn('Failed to load brand json:', id);
+      }
+      return res.json();
+    })
+  );
+
+  const brands = await Promise.all(promises);
+
+  // 3) menuData 구성
+  menuData.franchises = brands.filter(Boolean);
+
+  // 4) 초기 렌더링
+  renderApp(currentCategory, currentSearchQuery);
+}
+
+// 5) DOM 로드 후 데이터 로딩 시작
+document.addEventListener('DOMContentLoaded', () => {
+  loadMenuData();
+
+  // 나머지 이벤트 바인딩(ESC로 바텀시트 닫기 등)
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeSheet();
+    }
+  });
+});
