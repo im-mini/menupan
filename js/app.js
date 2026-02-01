@@ -61,6 +61,9 @@ const menuData = {
   franchises: []
 };
 
+const RECENT_KEY = 'menupan_recent_menus';
+const RECENT_LIMIT = 10;
+
 let isDraggingSheet = false;
 let dragStartY = 0;
 let currentTranslateY = 0;
@@ -323,6 +326,9 @@ function selectBrand(brandId) {
  * @param {string} itemId
  */
 function openSheet(brandId, itemId) {
+  
+  addRecentMenu(brandId, itemId);
+  
   const brand = menuData.franchises.find((b) => b.id === brandId);
   if (!brand) return;
   const item = brand.items.find((i) => i.id === itemId);
@@ -479,6 +485,8 @@ function openSheet(brandId, itemId) {
     sheet.style.transform  = '';    // 항상 0 기준에서 시작
     sheet.classList.add('active');
   }
+
+  renderRecentSection();
 }
 
 
@@ -765,7 +773,80 @@ async function loadMenuData() {
   menuData.franchises = brands;
 
   renderApp(currentCategory, currentSearchQuery);
+  renderRecentSection();
 }
+
+/**
+ * ============================
+ * 최근 본 메뉴 추가
+ * ============================
+ */
+function addRecentMenu(brandId, itemId) {
+  const now = Date.now();
+  /** @type {{brandId:string, itemId:string, ts:number}[]} */
+  let list = [];
+
+  try {
+    const raw = localStorage.getItem(RECENT_KEY);
+    if (raw) list = JSON.parse(raw);
+  } catch (e) {
+    console.warn('recent parse error', e);
+  }
+
+  // 기존거 제거 후 맨 앞에 추가
+  list = list.filter(m => !(m.brandId === brandId && m.itemId === itemId));
+  list.unshift({ brandId, itemId, ts: now });
+
+  if (list.length > RECENT_LIMIT) {
+    list = list.slice(0, RECENT_LIMIT);
+  }
+
+  localStorage.setItem(RECENT_KEY, JSON.stringify(list));
+}
+
+function renderRecentSection() {
+  const container = document.getElementById('recent-section');
+  if (!container) return;
+
+  let list = [];
+  try {
+    const raw = localStorage.getItem(RECENT_KEY);
+    if (raw) list = JSON.parse(raw);
+  } catch {}
+
+  if (!list.length) {
+    container.classList.add('hidden');
+    container.innerHTML = '';
+    return;
+  }
+
+  const cards = list
+    .map(({ brandId, itemId }) => {
+      const brand = menuData.franchises.find(b => b.id === brandId);
+      const item  = brand?.items.find(i => i.id === itemId);
+      if (!brand || !item) return '';
+
+      return `
+        <button
+          onclick="openSheet('${brandId}', '${itemId}')"
+          class="flex items-center gap-2 px-3 py-2 mr-2 mb-2 bg-white border border-gray-200 rounded-xl shadow-sm text-xs">
+          <span class="font-bold text-gray-800">${item.name}</span>
+          <span class="text-[10px] text-gray-400">(${brand.name})</span>
+        </button>
+      `;
+    })
+    .filter(Boolean)
+    .join('');
+
+  container.classList.remove('hidden');
+  container.innerHTML = `
+    <p class="text-[11px] text-gray-400 mb-1 px-1">최근 본 메뉴</p>
+    <div class="flex overflow-x-auto no-scrollbar pr-1">
+      ${cards}
+    </div>
+  `;
+}
+
 
 /**
  * ============================
