@@ -412,16 +412,30 @@
             // 각 옵션 그룹에서 기본값 설정
             item.option_groups.forEach(group => {
                 const defaultOption = group.options.find(opt => opt.default);
-                if (defaultOption) {
-                    selectedOptions[group.group_name] = defaultOption.name;
-                    // count 옵션이면 초기값 1로 설정
-                    if (defaultOption.count) {
-                        countOptions[group.group_name] = 1;
+            
+                if (group.required) {
+                    // 필수 옵션 그룹은 무조건 하나 선택해야 하므로
+                    if (defaultOption) {
+                        selectedOptions[group.group_name] = defaultOption.name;
+                        if (defaultOption.count) {
+                            countOptions[group.group_name] = 1;
+                        }
+                    } else if (group.options.length > 0) {
+                        const first = group.options[0];
+                        selectedOptions[group.group_name] = first.name;
+                        if (first.count) {
+                            countOptions[group.group_name] = 1;
+                        }
                     }
                 } else {
-                    selectedOptions[group.group_name] = group.options[0].name;
-                    if (group.options[0].count) {
-                        countOptions[group.group_name] = 1;
+                    // 필수 아닌 옵션은 기본적으로 "선택 안 함"
+                    // 만약 정말 기본으로 넣고 싶은 값이 있다면 데이터에 default: true를 넣고,
+                    // 그럴 때만 자동 선택되게 처리
+                    if (defaultOption) {
+                        selectedOptions[group.group_name] = defaultOption.name;
+                        if (defaultOption.count) {
+                            countOptions[group.group_name] = 1;
+                        }
                     }
                 }
             });
