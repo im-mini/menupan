@@ -57,7 +57,9 @@
  */
 
 /** @type {MenuData} */
-const menuData = { franchises: [] };
+const menuData = { 
+  franchises: [] 
+};
 
 let currentCategory = 'all';
 let currentSearchQuery = '';
