@@ -328,7 +328,7 @@ function openSheet(brandId, itemId) {
   selectedOptions = {};
   countOptions = {};
 
-  // 필수/기본값 설정
+  // 기본값 설정
   item.option_groups.forEach((group) => {
     const nonCountOptions = group.options.filter((opt) => !opt.count);
     const defaultOption = nonCountOptions.find((opt) => opt.default);
@@ -339,7 +339,6 @@ function openSheet(brandId, itemId) {
       } else if (nonCountOptions.length > 0) {
         selectedOptions[group.group_name] = nonCountOptions[0].name;
       }
-      // count 옵션만 있는 필수 그룹은 여기선 선택 X (사용자 입력 기준)
     } else {
       if (defaultOption) {
         selectedOptions[group.group_name] = defaultOption.name;
@@ -348,10 +347,11 @@ function openSheet(brandId, itemId) {
   });
 
   const content = document.getElementById('sheet-content');
-  if (!content) return;
+  const footer  = document.getElementById('sheet-footer');
+  if (!content || !footer) return;
 
+  // 🔹 옵션/내용 부분만 렌더링 (최종 금액 영역은 여기서 빼줌)
   content.innerHTML = `
-    <!-- 메뉴 제목 -->
     <h3 class="text-2xl font-black mb-2 text-gray-900">${item.name}</h3>
     <div class="flex gap-2 mb-1">
       ${(item.tags || [])
@@ -361,8 +361,7 @@ function openSheet(brandId, itemId) {
     <p class="text-sm text-gray-500 mb-6">
       <i class="fas fa-store"></i> ${brand.name}
     </p>
-    
-    <!-- 옵션 그룹들 -->
+
     <div class="space-y-6">
       ${item.option_groups
         .map(
@@ -378,7 +377,8 @@ function openSheet(brandId, itemId) {
             ${group.options
               .map((opt) => {
                 const isCount = !!opt.count;
-                const isSelected = selectedOptions[group.group_name] === opt.name;
+                const isSelected =
+                  selectedOptions[group.group_name] === opt.name;
 
                 if (isCount) {
                   const spanId = `count-${group.group_name.replace(/\s/g, '-')}`;
@@ -411,9 +411,8 @@ function openSheet(brandId, itemId) {
                   `;
                 }
 
-                // 일반 옵션
                 return `
-                  <button 
+                  <button
                     onclick="selectOption('${group.group_name}', '${opt.name}', ${opt.extra}, '${brandId}', '${itemId}')"
                     class="option-btn ${
                       isSelected ? 'selected' : ''
@@ -440,33 +439,39 @@ function openSheet(brandId, itemId) {
         )
         .join('')}
     </div>
-    
-    <!-- 하단 가격 및 구매 버튼 -->
-    <div class="mt-8 pt-6 border-t sticky bottom-0 bg-white">
-      <div class="flex justify-between items-center">
-        <div>
-          <p class="text-xs text-gray-500 mb-1">최종 예상 금액</p>
-          <p id="final-price" class="text-3xl font-black text-red-600">
-            ${calculateTotalPrice(item, selectedOptions, countOptions).toLocaleString()}원
-          </p>
-        </div>
-        <button class="bg-red-600 text-white px-8 py-4 rounded-2xl font-bold shadow-lg shadow-red-200 hover:bg-red-700 transition-colors active:scale-95">
-          <i class="fas fa-shopping-cart mr-2"></i>구매하기
-        </button>
+  `;
+
+  // 🔹 최종 금액/버튼은 푸터에만 렌더링
+  footer.innerHTML = `
+    <div class="flex justify-between items-center">
+      <div>
+        <p class="text-xs text-gray-500 mb-1">최종 예상 금액</p>
+        <p id="final-price" class="text-3xl font-black text-red-600">
+          ${calculateTotalPrice(item, selectedOptions, countOptions).toLocaleString()}원
+        </p>
       </div>
+      <button class="bg-red-600 text-white px-8 py-4 rounded-2xl font-bold shadow-lg shadow-red-200 hover:bg-red-700 transition-colors active:scale-95">
+        <i class="fas fa-shopping-cart mr-2"></i>구매하기
+      </button>
     </div>
   `;
 
+  // 🔹 스크롤 항상 맨 위로 초기화
+  const scrollArea = document.getElementById('sheet-content');
+  if (scrollArea) {
+    scrollArea.scrollTop = 0;
+  }
+
+  // 🔹 바디 스크롤 막기
+  document.body.style.overflow = 'hidden';
+
+  // 바텀시트 표시
   const overlay = document.getElementById('overlay');
   const sheet = document.getElementById('bottom-sheet');
-
-  if (sheet) {
-    // ✅ 항상 맨 위부터 보이도록
-    sheet.scrollTop = 0;
-    sheet.classList.add('active');
-  }
   overlay && overlay.classList.remove('hidden');
+  sheet && sheet.classList.add('active');
 }
+
 
 /**
  * 총 가격 계산
@@ -597,8 +602,11 @@ function closeSheet() {
   const sheet = document.getElementById('bottom-sheet');
   overlay && overlay.classList.add('hidden');
   sheet && sheet.classList.remove('active');
+
   selectedOptions = {};
   countOptions = {};
+
+  document.body.style.overflow = '';
 }
 
 /**
