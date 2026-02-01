@@ -382,14 +382,15 @@
          * 브랜드 탭 버튼 클릭
          */
         function scrollToBrand(btn, sectionId) {
-            // 모든 버튼 원래대로
+            // 모든 버튼 초기화
             document.querySelectorAll('.brand-tab-btn').forEach(b => {
-                b.classList.replace('bg-black', 'bg-gray-100');
-                b.classList.replace('text-white', 'text-gray-900');
+                b.classList.remove('bg-black', 'text-white');
+                b.classList.add('bg-gray-100', 'text-gray-900');
             });
-            // 클릭한 버튼 강조
-            btn.classList.replace('bg-gray-100', 'bg-black');
-            btn.classList.add('text-white');
+            
+            // 클릭한 버튼만 강조
+            btn.classList.remove('bg-gray-100', 'text-gray-900');
+            btn.classList.add('bg-black', 'text-white');
         
             // 이동
             document.getElementById(sectionId).scrollIntoView({behavior: 'smooth', block: 'start'});
@@ -646,10 +647,18 @@
             currentCategory = category;
             renderApp(category, currentSearchQuery);
             
-            // 카테고리 버튼 활성화 상태 업데이트
+            // 카테고리 버튼 활성화 상태 업데이트 (모든 버튼 초기화)
             const buttons = document.querySelectorAll('.category-btn');
-            buttons.forEach(btn => btn.classList.remove('active'));
+            buttons.forEach(btn => {
+                btn.classList.remove('active');
+                btn.classList.remove('bg-black', 'text-white');
+                btn.classList.add('bg-white', 'border', 'border-gray-300', 'text-gray-700');
+            });
+            
+            // 클릭한 버튼만 활성화
             event.target.classList.add('active');
+            event.target.classList.remove('bg-white', 'border', 'border-gray-300', 'text-gray-700');
+            event.target.classList.add('bg-black', 'text-white');
         }
 
         // 페이지 로드시 초기화
