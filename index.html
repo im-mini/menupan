@@ -172,16 +172,16 @@
             
             <!-- 카테고리 필터 -->
             <div id="category-filter" class="flex gap-2 mt-3 overflow-x-auto no-scrollbar text-sm pb-2">
-                <button onclick="filterByCategory('all')" class="category-btn active bg-black text-white px-4 py-2 rounded-full shrink-0 transition-all">
+                <button onclick="filterByCategory('all', event)" class="category-btn active bg-black text-white px-4 py-2 rounded-full shrink-0 transition-all">
                     전체
                 </button>
-                <button onclick="filterByCategory('cafe')" class="category-btn bg-white border border-gray-300 px-4 py-2 rounded-full shrink-0 text-gray-700 hover:border-gray-400 transition-all">
+                <button onclick="filterByCategory('cafe', event)" class="category-btn bg-white border border-gray-300 px-4 py-2 rounded-full shrink-0 text-gray-700 hover:border-gray-400 transition-all">
                     ☕ 카페
                 </button>
-                <button onclick="filterByCategory('fastfood')" class="category-btn bg-white border border-gray-300 px-4 py-2 rounded-full shrink-0 text-gray-700 hover:border-gray-400 transition-all">
+                <button onclick="filterByCategory('fastfood', event)" class="category-btn bg-white border border-gray-300 px-4 py-2 rounded-full shrink-0 text-gray-700 hover:border-gray-400 transition-all">
                     🍔 패스트푸드
                 </button>
-                <button onclick="filterByCategory('korean')" class="category-btn bg-white border border-gray-300 px-4 py-2 rounded-full shrink-0 text-gray-700 hover:border-gray-400 transition-all">
+                <button onclick="filterByCategory('korean', event)" class="category-btn bg-white border border-gray-300 px-4 py-2 rounded-full shrink-0 text-gray-700 hover:border-gray-400 transition-all">
                     🍲 한식/뷔페
                 </button>
             </div>
@@ -412,7 +412,7 @@
             // 각 옵션 그룹에서 기본값 설정
             item.option_groups.forEach(group => {
                 const nonCountOptions = group.options.filter(opt => !opt.count);
-                const defaultOption = group.options.find(opt => opt.default);
+                const defaultOption = nonCountOptions.find(opt => opt.default);
             
                 if (group.required) {
                     // 필수 옵션 그룹은 non-count 옵션 중에서만 기본값 선택
@@ -422,8 +422,7 @@
                         const first = nonCountOptions[0];
                         selectedOptions[group.group_name] = first.name;
                     }
-                    // 👉 required여도 count 옵션만 있는 그룹(예: 샷추가)이면
-                    // 여기서는 아무 옵션도 선택하지 않음 (사용자가 직접 + 눌러야 함)
+                    // 👉 required여도 count 옵션만 있는 그룹이면 여기서는 아무 옵션도 선택 안 함
                 } else {
                     // 필수 아닌 옵션은 기본적으로 "선택 안 함"
                     // 단, non-count 옵션에 default: true가 있으면 그때만 자동 선택
@@ -457,13 +456,13 @@
                             </div>
                             <div class="grid grid-cols-2 gap-2">
                                 ${group.options.map((opt, optIndex) => {
-                                    const isDefault = opt.default || false;
                                     const isCount = opt.count || false;
-                                    
+                                    const isSelected = selectedOptions[group.group_name] === opt.name;
+                                
                                     if (isCount) {
-                                        // 카운트 옵션 (+ - 버튼)
+                                        // 카운트 옵션 (+ - 버튼) - count 옵션은 기본 0개, border는 그냥 고정
                                         return `
-                                            <div class="col-span-2 border-2 ${isDefault ? 'border-red-500 bg-red-50' : 'border-gray-200'} p-3 rounded-xl count-option">
+                                            <div class="col-span-2 border-2 border-gray-200 p-3 rounded-xl count-option">
                                                 <div>
                                                     <p class="text-sm font-medium text-gray-900">${opt.name}</p>
                                                     <p class="text-xs text-gray-500 mt-1">
@@ -471,11 +470,13 @@
                                                     </p>
                                                 </div>
                                                 <div class="flex items-center gap-3">
-                                                    <button onclick="decreaseCount('${group.group_name}', '${opt.name}', ${opt.extra}, '${brandId}', '${itemId}')" class="count-btn">
+                                                    <button onclick="decreaseCount('${group.group_name}', '${opt.name}', ${opt.extra}, '${brandId}', '${itemId}', event)" class="count-btn">
                                                         <i class="fas fa-minus text-xs"></i>
                                                     </button>
-                                                    <span class="count-value" id="count-${group.group_name.replace(/\s/g, '-')}">${countOptions[group.group_name] ?? 0}</span>
-                                                    <button onclick="increaseCount('${group.group_name}', '${opt.name}', ${opt.extra}, '${brandId}', '${itemId}')" class="count-btn">
+                                                    <span class="count-value" id="count-${group.group_name.replace(/\s/g, '-')}">
+                                                        ${countOptions[group.group_name] ?? 0}
+                                                    </span>
+                                                    <button onclick="increaseCount('${group.group_name}', '${opt.name}', ${opt.extra}, '${brandId}', '${itemId}', event)" class="count-btn">
                                                         <i class="fas fa-plus text-xs"></i>
                                                     </button>
                                                 </div>
@@ -486,7 +487,7 @@
                                         return `
                                             <button 
                                                 onclick="selectOption('${group.group_name}', '${opt.name}', ${opt.extra}, '${brandId}', '${itemId}')"
-                                                class="option-btn ${isDefault ? 'selected' : ''} border-2 border-gray-200 p-3 rounded-xl text-left hover:border-red-300 transition-all"
+                                                class="option-btn ${isSelected ? 'selected' : ''} border-2 border-gray-200 p-3 rounded-xl text-left hover:border-red-300 transition-all"
                                                 data-group="${group.group_name}"
                                                 data-option="${opt.name}">
                                                 <p class="text-sm font-medium text-gray-900">${opt.name}</p>
@@ -556,8 +557,8 @@
         /**
          * 카운트 증가
          */
-        function increaseCount(groupName, optionName, extraPrice, brandId, itemId) {
-            event.stopPropagation();
+        function increaseCount(groupName, optionName, extraPrice, brandId, itemId, e) {
+            e.stopPropagation();
             
             const current = countOptions[groupName] ?? 0;
             const next = current + 1;
@@ -581,8 +582,8 @@
         /**
          * 카운트 감소
          */
-        function decreaseCount(groupName, optionName, extraPrice, brandId, itemId) {
-            event.stopPropagation();
+        function decreaseCount(groupName, optionName, extraPrice, brandId, itemId, e) {
+            e.stopPropagation();
             
             const current = countOptions[groupName] ?? 0;
             if (current <= 0) return;
@@ -663,7 +664,7 @@
          * 카테고리 필터링
          * @param {string} category - 카테고리 ('all', 'cafe', 'fastfood', 'korean')
          */
-        function filterByCategory(category) {
+        function filterByCategory(category, e) {
             currentCategory = category;
             renderApp(category, currentSearchQuery);
             
@@ -676,9 +677,9 @@
             });
             
             // 클릭한 버튼만 활성화
-            event.target.classList.add('active');
-            event.target.classList.remove('bg-white', 'border', 'border-gray-300', 'text-gray-700');
-            event.target.classList.add('bg-black', 'text-white');
+            e.target.classList.add('active');
+            e.target.classList.remove('bg-white', 'border', 'border-gray-300', 'text-gray-700');
+            e.target.classList.add('bg-black', 'text-white');
         }
 
         // 페이지 로드시 초기화
