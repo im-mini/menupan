@@ -612,33 +612,7 @@ function filterByCategory(category, e) {
 async function loadMenuData() {
   // 실제로 만드는 JSON 파일 이름에 맞춰서 수정하면 됨
   const BRAND_IDS = [
-    'starbucks',
-    'twosome',
-    'mega_coffee',
-    'gongcha',
-    'ediya',
-    'paikdabang',
-    'mammoth_coffee',
-    'the_venti',
-    'mcdonalds',
-    'burger_king',
-    'lotteria',
-    'nobrand_burger',
-    'subway',
-    'domino_pizza',
-    'pizza_school',
-    'pizza_maru',
-    'kyochon',
-    'bbq',
-    'bhc',
-    'yubdduck',
-    'shinjeong',
-    'bonjuck',
-    'poke_allday',
-    'hongkong_banjum',
-    'vips',
-    'mibundang',
-    'shabu-allday'
+    'starbucks'
   ];
 
   const promises = BRAND_IDS.map((id) =>
