@@ -103,6 +103,46 @@
         .price-animate {
             animation: priceUpdate 0.3s ease-in-out;
         }
+
+        /* 검색어 하이라이트 */
+        .highlight {
+            background-color: #fef08a;
+            font-weight: bold;
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+
+        /* 카운트 버튼 스타일 */
+        .count-option {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .count-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f3f4f6;
+            color: #374151;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .count-btn:hover {
+            background-color: #dc2626;
+            color: white;
+        }
+        .count-btn:active {
+            transform: scale(0.9);
+        }
+        .count-value {
+            min-width: 30px;
+            text-align: center;
+            font-weight: bold;
+        }
     </style>
     
     <!-- 데이터 -->
@@ -114,12 +154,24 @@
         <div class="p-4">
             <h1 class="text-2xl font-extrabold text-red-600 italic flex items-center gap-2">
                 <i class="fas fa-utensils"></i>
-                MENU HUB
+                메뉴빤
             </h1>
             <p class="text-xs text-gray-500 mt-1">프랜차이즈 메뉴 가격 비교</p>
             
+            <!-- 검색창 -->
+            <div class="mt-3 relative">
+                <input 
+                    type="text" 
+                    id="search-input" 
+                    placeholder="메뉴, 브랜드, 태그 검색..." 
+                    class="w-full px-4 py-2 pr-10 border border-gray-300 rounded-full focus:outline-none focus:border-red-500 transition-all"
+                    oninput="handleSearch(this.value)"
+                >
+                <i class="fas fa-search absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            </div>
+            
             <!-- 카테고리 필터 -->
-            <div id="category-filter" class="flex gap-2 mt-4 overflow-x-auto no-scrollbar text-sm pb-2">
+            <div id="category-filter" class="flex gap-2 mt-3 overflow-x-auto no-scrollbar text-sm pb-2">
                 <button onclick="filterByCategory('all')" class="category-btn active bg-black text-white px-4 py-2 rounded-full shrink-0 transition-all">
                     전체
                 </button>
@@ -135,7 +187,7 @@
             </div>
 
             <!-- 브랜드 탭 -->
-            <div id="brand-tabs" class="flex gap-2 mt-2 overflow-x-auto no-scrollbar pb-2 px-4 bg-white border-b sticky top-[130px] z-30 hidden">
+            <div id="brand-tabs" class="flex gap-2 mt-2 overflow-x-auto no-scrollbar pb-2 hidden">
             </div>
         </div>
     </header>
@@ -162,35 +214,103 @@
 
         // 전역 변수
         let currentCategory = 'all';
+        let currentSearchQuery = '';
         let selectedOptions = {}; // 현재 선택된 옵션 저장
+        let countOptions = {}; // 카운트 옵션 저장 (예: { "샷 추가": 2 })
+
+        /**
+         * 검색어 하이라이트 함수
+         * @param {string} text - 원본 텍스트
+         * @param {string} query - 검색어
+         * @returns {string} - 하이라이트 처리된 HTML
+         */
+        function highlightText(text, query) {
+            if (!query) return text;
+            const regex = new RegExp(`(${query})`, 'gi');
+            return text.replace(regex, '<span class="highlight">$1</span>');
+        }
+
+        /**
+         * 검색 핸들러
+         * @param {string} query - 검색어
+         */
+        function handleSearch(query) {
+            currentSearchQuery = query.trim().toLowerCase();
+            renderApp(currentCategory, currentSearchQuery);
+        }
+
+        /**
+         * 메뉴가 검색어와 매칭되는지 확인
+         * @param {object} item - 메뉴 아이템
+         * @param {string} brandName - 브랜드명
+         * @param {string} query - 검색어
+         * @returns {boolean}
+         */
+        function isItemMatchSearch(item, brandName, query) {
+            if (!query) return true;
+            
+            // 메뉴명 매칭
+            if (item.name.toLowerCase().includes(query)) return true;
+            
+            // 태그 매칭
+            if (item.tags.some(tag => tag.toLowerCase().includes(query))) return true;
+            
+            // 브랜드명 매칭 (브랜드명이 매칭되면 해당 브랜드의 모든 메뉴 노출)
+            if (brandName.toLowerCase().includes(query)) return true;
+            
+            return false;
+        }
 
         /**
          * 메인 앱 렌더링
          * @param {string} filter - 카테고리 필터 ('all', 'cafe', 'fastfood', 'korean')
+         * @param {string} searchQuery - 검색어
          */
-        function renderApp(filter = 'all') {
+        function renderApp(filter = 'all', searchQuery = '') {
             const container = document.getElementById('app');
             const brandTabs = document.getElementById('brand-tabs');
             container.innerHTML = '';
             
             // 카테고리별로 브랜드 필터링
-            const filteredFranchises = menuData.franchises.filter(brand => 
+            let filteredFranchises = menuData.franchises.filter(brand => 
                 filter === 'all' || brand.category === filter
             );
+
+            // 검색어가 있을 경우 필터링
+            if (searchQuery) {
+                filteredFranchises = filteredFranchises.map(brand => {
+                    // 브랜드명이 검색어와 매칭되면 모든 메뉴 포함
+                    if (brand.name.toLowerCase().includes(searchQuery)) {
+                        return brand;
+                    }
+                    
+                    // 아니면 매칭되는 메뉴만 필터링
+                    const matchedItems = brand.items.filter(item => 
+                        isItemMatchSearch(item, brand.name, searchQuery)
+                    );
+                    
+                    if (matchedItems.length > 0) {
+                        return { ...brand, items: matchedItems };
+                    }
+                    return null;
+                }).filter(brand => brand !== null);
+            }
 
             // 브랜드가 없을 경우
             if (filteredFranchises.length === 0) {
                 container.innerHTML = `
                     <div class="text-center py-20">
                         <i class="fas fa-search text-gray-400 text-5xl mb-4"></i>
-                        <p class="text-gray-600">해당 카테고리의 메뉴가 없습니다.</p>
+                        <p class="text-gray-600">${searchQuery ? '검색 결과가 없습니다.' : '해당 카테고리의 메뉴가 없습니다.'}</p>
+                        ${searchQuery ? '<p class="text-sm text-gray-400 mt-2">다른 검색어로 시도해보세요.</p>' : ''}
                     </div>
                 `;
+                brandTabs.classList.add('hidden');
                 return;
             }
 
             // 브랜드 탭 생성 및 표시
-            if (filteredFranchises.length > 1) {
+            if (filteredFranchises.length > 1 && !searchQuery) {
                 brandTabs.classList.remove('hidden');
                 brandTabs.innerHTML = filteredFranchises.map(brand => `
                     <button onclick="scrollToBrand(this, 'section-${brand.id}')"
@@ -206,14 +326,14 @@
             filteredFranchises.forEach(brand => {
                 const section = document.createElement('section');
                 section.id = `section-${brand.id}`;
-                section.className = 'bg-white rounded-2xl shadow-sm p-5 mb-4 scroll-mt-[180px]'
+                section.className = 'bg-white rounded-2xl shadow-sm p-5 mb-4 scroll-mt-[220px]';
                 
                 section.innerHTML = `
                     <!-- 브랜드 헤더 -->
                     <div class="flex justify-between items-center mb-4">
                         <h2 class="text-xl font-bold flex items-center gap-2">
                             <span class="w-1 h-6 bg-red-600 rounded"></span> 
-                            ${brand.name}
+                            ${highlightText(brand.name, searchQuery)}
                         </h2>
                         <span class="text-xs text-gray-400">
                             <i class="far fa-clock"></i> ${brand.last_updated} 업데이트
@@ -231,11 +351,11 @@
                                         <div class="flex gap-1.5 mb-2 flex-wrap">
                                             ${item.tags.map(tag => `
                                                 <span class="text-[10px] bg-red-50 text-red-600 px-2 py-0.5 rounded-full font-bold">
-                                                    #${tag}
+                                                    #${highlightText(tag, searchQuery)}
                                                 </span>
                                             `).join('')}
                                         </div>
-                                        <h3 class="font-bold text-gray-900 mb-1">${item.name}</h3>
+                                        <h3 class="font-bold text-gray-900 mb-1">${highlightText(item.name, searchQuery)}</h3>
                                         <p class="text-xs text-gray-500">
                                             <i class="fas fa-sliders-h"></i> 옵션 선택 가능
                                         </p>
@@ -244,7 +364,7 @@
                                     <!-- 가격 및 화살표 -->
                                     <div class="text-right ml-4">
                                         <p class="font-black text-lg text-gray-900">
-                                            ${item.base_price.toLocaleString()}원
+                                            ${item.base_price.toLocaleString()}원~
                                         </p>
                                         <i class="fa-solid fa-chevron-right text-gray-300 text-sm mt-1"></i>
                                     </div>
@@ -258,7 +378,9 @@
             });
         }
 
-        // 브랜드 탭 버튼 클릭
+        /**
+         * 브랜드 탭 버튼 클릭
+         */
         function scrollToBrand(btn, sectionId) {
             // 모든 버튼 원래대로
             document.querySelectorAll('.brand-tab-btn').forEach(b => {
@@ -284,14 +406,22 @@
             
             // 선택된 옵션 초기화
             selectedOptions = {};
+            countOptions = {};
             
             // 각 옵션 그룹에서 기본값 설정
             item.option_groups.forEach(group => {
                 const defaultOption = group.options.find(opt => opt.default);
                 if (defaultOption) {
                     selectedOptions[group.group_name] = defaultOption.name;
+                    // count 옵션이면 초기값 1로 설정
+                    if (defaultOption.count) {
+                        countOptions[group.group_name] = 1;
+                    }
                 } else {
                     selectedOptions[group.group_name] = group.options[0].name;
+                    if (group.options[0].count) {
+                        countOptions[group.group_name] = 1;
+                    }
                 }
             });
             
@@ -320,18 +450,44 @@
                             <div class="grid grid-cols-2 gap-2">
                                 ${group.options.map((opt, optIndex) => {
                                     const isDefault = opt.default || false;
-                                    return `
-                                        <button 
-                                            onclick="selectOption('${group.group_name}', '${opt.name}', ${opt.extra}, '${brandId}', '${itemId}')"
-                                            class="option-btn ${isDefault ? 'selected' : ''} border-2 border-gray-200 p-3 rounded-xl text-left hover:border-red-300 transition-all"
-                                            data-group="${group.group_name}"
-                                            data-option="${opt.name}">
-                                            <p class="text-sm font-medium text-gray-900">${opt.name}</p>
-                                            <p class="text-xs text-gray-500 mt-1">
-                                                ${opt.extra > 0 ? '+' + opt.extra.toLocaleString() + '원' : '기본'}
-                                            </p>
-                                        </button>
-                                    `;
+                                    const isCount = opt.count || false;
+                                    
+                                    if (isCount) {
+                                        // 카운트 옵션 (+ - 버튼)
+                                        return `
+                                            <div class="col-span-2 border-2 ${isDefault ? 'border-red-500 bg-red-50' : 'border-gray-200'} p-3 rounded-xl count-option">
+                                                <div>
+                                                    <p class="text-sm font-medium text-gray-900">${opt.name}</p>
+                                                    <p class="text-xs text-gray-500 mt-1">
+                                                        ${opt.extra > 0 ? '+' + opt.extra.toLocaleString() + '원' : opt.extra < 0 ? opt.extra.toLocaleString() + '원' : '기본'} / 개당
+                                                    </p>
+                                                </div>
+                                                <div class="flex items-center gap-3">
+                                                    <button onclick="decreaseCount('${group.group_name}', '${opt.name}', ${opt.extra}, '${brandId}', '${itemId}')" class="count-btn">
+                                                        <i class="fas fa-minus text-xs"></i>
+                                                    </button>
+                                                    <span class="count-value" id="count-${group.group_name.replace(/\s/g, '-')}">${countOptions[group.group_name] || 1}</span>
+                                                    <button onclick="increaseCount('${group.group_name}', '${opt.name}', ${opt.extra}, '${brandId}', '${itemId}')" class="count-btn">
+                                                        <i class="fas fa-plus text-xs"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        `;
+                                    } else {
+                                        // 일반 옵션
+                                        return `
+                                            <button 
+                                                onclick="selectOption('${group.group_name}', '${opt.name}', ${opt.extra}, '${brandId}', '${itemId}')"
+                                                class="option-btn ${isDefault ? 'selected' : ''} border-2 border-gray-200 p-3 rounded-xl text-left hover:border-red-300 transition-all"
+                                                data-group="${group.group_name}"
+                                                data-option="${opt.name}">
+                                                <p class="text-sm font-medium text-gray-900">${opt.name}</p>
+                                                <p class="text-xs text-gray-500 mt-1">
+                                                    ${opt.extra > 0 ? '+' + opt.extra.toLocaleString() + '원' : opt.extra < 0 ? opt.extra.toLocaleString() + '원' : '기본'}
+                                                </p>
+                                            </button>
+                                        `;
+                                    }
                                 }).join('')}
                             </div>
                         </div>
@@ -344,7 +500,7 @@
                         <div>
                             <p class="text-xs text-gray-500 mb-1">최종 예상 금액</p>
                             <p id="final-price" class="text-3xl font-black text-red-600">
-                                ${item.base_price.toLocaleString()}원
+                                ${calculateTotalPrice(item, selectedOptions, countOptions).toLocaleString()}원
                             </p>
                         </div>
                         <button class="bg-red-600 text-white px-8 py-4 rounded-2xl font-bold shadow-lg shadow-red-200 hover:bg-red-700 transition-colors active:scale-95">
@@ -357,6 +513,73 @@
             // 바텀시트 표시
             document.getElementById('overlay').classList.remove('hidden');
             document.getElementById('bottom-sheet').classList.add('active');
+        }
+
+        /**
+         * 총 가격 계산 함수
+         * @param {object} item - 메뉴 아이템
+         * @param {object} selectedOpts - 선택된 옵션
+         * @param {object} countOpts - 카운트 옵션
+         * @returns {number} - 총 가격
+         */
+        function calculateTotalPrice(item, selectedOpts, countOpts) {
+            let totalPrice = item.base_price;
+            
+            item.option_groups.forEach(group => {
+                const selectedOptionName = selectedOpts[group.group_name];
+                const selectedOption = group.options.find(opt => opt.name === selectedOptionName);
+                
+                if (selectedOption) {
+                    if (selectedOption.count) {
+                        // 카운트 옵션: extra * count
+                        const count = countOpts[group.group_name] || 1;
+                        totalPrice += selectedOption.extra * count;
+                    } else {
+                        // 일반 옵션: extra만 더하기 (양수면 +, 음수면 -)
+                        totalPrice += selectedOption.extra;
+                    }
+                }
+            });
+            
+            return totalPrice;
+        }
+
+        /**
+         * 카운트 증가
+         */
+        function increaseCount(groupName, optionName, extraPrice, brandId, itemId) {
+            event.stopPropagation();
+            
+            countOptions[groupName] = (countOptions[groupName] || 1) + 1;
+            
+            // UI 업데이트
+            const countElement = document.getElementById(`count-${groupName.replace(/\s/g, '-')}`);
+            if (countElement) {
+                countElement.textContent = countOptions[groupName];
+            }
+            
+            // 가격 업데이트
+            updatePrice(brandId, itemId);
+        }
+
+        /**
+         * 카운트 감소
+         */
+        function decreaseCount(groupName, optionName, extraPrice, brandId, itemId) {
+            event.stopPropagation();
+            
+            if ((countOptions[groupName] || 1) > 1) {
+                countOptions[groupName] = countOptions[groupName] - 1;
+                
+                // UI 업데이트
+                const countElement = document.getElementById(`count-${groupName.replace(/\s/g, '-')}`);
+                if (countElement) {
+                    countElement.textContent = countOptions[groupName];
+                }
+                
+                // 가격 업데이트
+                updatePrice(brandId, itemId);
+            }
         }
 
         /**
@@ -381,20 +604,18 @@
                 selectedButton.classList.add('selected');
             }
             
-            // 총 가격 계산
+            // 가격 업데이트
+            updatePrice(brandId, itemId);
+        }
+
+        /**
+         * 가격 업데이트 함수
+         */
+        function updatePrice(brandId, itemId) {
             const brand = menuData.franchises.find(b => b.id === brandId);
             const item = brand.items.find(i => i.id === itemId);
             
-            let totalPrice = item.base_price;
-            
-            // 각 옵션 그룹의 선택된 옵션 가격 합산
-            item.option_groups.forEach(group => {
-                const selectedOptionName = selectedOptions[group.group_name];
-                const selectedOption = group.options.find(opt => opt.name === selectedOptionName);
-                if (selectedOption) {
-                    totalPrice += selectedOption.extra;
-                }
-            });
+            const totalPrice = calculateTotalPrice(item, selectedOptions, countOptions);
             
             // 가격 업데이트 애니메이션
             const priceElement = document.getElementById('final-price');
@@ -414,6 +635,7 @@
             document.getElementById('overlay').classList.add('hidden');
             document.getElementById('bottom-sheet').classList.remove('active');
             selectedOptions = {};
+            countOptions = {};
         }
 
         /**
@@ -422,7 +644,7 @@
          */
         function filterByCategory(category) {
             currentCategory = category;
-            renderApp(category);
+            renderApp(category, currentSearchQuery);
             
             // 카테고리 버튼 활성화 상태 업데이트
             const buttons = document.querySelectorAll('.category-btn');
@@ -432,7 +654,7 @@
 
         // 페이지 로드시 초기화
         document.addEventListener('DOMContentLoaded', () => {
-            renderApp(currentCategory);
+            renderApp(currentCategory, currentSearchQuery);
         });
 
         // ESC 키로 바텀시트 닫기
