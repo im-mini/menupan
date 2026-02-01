@@ -411,31 +411,24 @@
             
             // 각 옵션 그룹에서 기본값 설정
             item.option_groups.forEach(group => {
+                const nonCountOptions = group.options.filter(opt => !opt.count);
                 const defaultOption = group.options.find(opt => opt.default);
             
                 if (group.required) {
-                    // 필수 옵션 그룹은 무조건 하나 선택해야 하므로
+                    // 필수 옵션 그룹은 non-count 옵션 중에서만 기본값 선택
                     if (defaultOption) {
                         selectedOptions[group.group_name] = defaultOption.name;
-                        if (defaultOption.count) {
-                            countOptions[group.group_name] = 1;
-                        }
-                    } else if (group.options.length > 0) {
-                        const first = group.options[0];
+                    } else if (nonCountOptions.length > 0) {
+                        const first = nonCountOptions[0];
                         selectedOptions[group.group_name] = first.name;
-                        if (first.count) {
-                            countOptions[group.group_name] = 1;
-                        }
                     }
+                    // 👉 required여도 count 옵션만 있는 그룹(예: 샷추가)이면
+                    // 여기서는 아무 옵션도 선택하지 않음 (사용자가 직접 + 눌러야 함)
                 } else {
                     // 필수 아닌 옵션은 기본적으로 "선택 안 함"
-                    // 만약 정말 기본으로 넣고 싶은 값이 있다면 데이터에 default: true를 넣고,
-                    // 그럴 때만 자동 선택되게 처리
+                    // 단, non-count 옵션에 default: true가 있으면 그때만 자동 선택
                     if (defaultOption) {
                         selectedOptions[group.group_name] = defaultOption.name;
-                        if (defaultOption.count) {
-                            countOptions[group.group_name] = 1;
-                        }
                     }
                 }
             });
@@ -481,7 +474,7 @@
                                                     <button onclick="decreaseCount('${group.group_name}', '${opt.name}', ${opt.extra}, '${brandId}', '${itemId}')" class="count-btn">
                                                         <i class="fas fa-minus text-xs"></i>
                                                     </button>
-                                                    <span class="count-value" id="count-${group.group_name.replace(/\s/g, '-')}">${countOptions[group.group_name] || 1}</span>
+                                                    <span class="count-value" id="count-${group.group_name.replace(/\s/g, '-')}">${countOptions[group.group_name] ?? 0}</span>
                                                     <button onclick="increaseCount('${group.group_name}', '${opt.name}', ${opt.extra}, '${brandId}', '${itemId}')" class="count-btn">
                                                         <i class="fas fa-plus text-xs"></i>
                                                     </button>
@@ -547,7 +540,8 @@
                 if (selectedOption) {
                     if (selectedOption.count) {
                         // 카운트 옵션: extra * count
-                        const count = countOpts[group.group_name] || 1;
+                        const rawCount = countOpts[group.group_name];
+                        const count = (typeof rawCount === 'number') ? rawCount : 0;
                         totalPrice += selectedOption.extra * count;
                     } else {
                         // 일반 옵션: extra만 더하기 (양수면 +, 음수면 -)
@@ -565,12 +559,19 @@
         function increaseCount(groupName, optionName, extraPrice, brandId, itemId) {
             event.stopPropagation();
             
-            countOptions[groupName] = (countOptions[groupName] || 1) + 1;
+            const current = countOptions[groupName] ?? 0;
+            const next = current + 1;
+            countOptions[groupName] = next;
+        
+            // 처음 + 누를 때 해당 옵션을 선택된 상태로 만들어줌
+            if (!selectedOptions[groupName]) {
+                selectedOptions[groupName] = optionName;
+            }
             
             // UI 업데이트
             const countElement = document.getElementById(`count-${groupName.replace(/\s/g, '-')}`);
             if (countElement) {
-                countElement.textContent = countOptions[groupName];
+                countElement.textContent = next;
             }
             
             // 가격 업데이트
@@ -583,18 +584,23 @@
         function decreaseCount(groupName, optionName, extraPrice, brandId, itemId) {
             event.stopPropagation();
             
-            if ((countOptions[groupName] || 1) > 1) {
-                countOptions[groupName] = countOptions[groupName] - 1;
-                
-                // UI 업데이트
-                const countElement = document.getElementById(`count-${groupName.replace(/\s/g, '-')}`);
-                if (countElement) {
-                    countElement.textContent = countOptions[groupName];
-                }
-                
-                // 가격 업데이트
-                updatePrice(brandId, itemId);
+            const current = countOptions[groupName] ?? 0;
+            if (current <= 0) return;
+        
+            const next = current - 1;
+            countOptions[groupName] = next;
+
+            // UI 업데이트
+            const countElement = document.getElementById(`count-${groupName.replace(/\s/g, '-')}`);
+            if (countElement) {
+                countElement.textContent = next;
             }
+        
+            if (next === 0) {
+                delete selectedOptions[groupName];
+            }
+        
+            updatePrice(brandId, itemId);
         }
 
         /**
