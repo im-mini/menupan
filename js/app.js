@@ -61,6 +61,10 @@ const menuData = {
   franchises: []
 };
 
+let isDraggingSheet = false;
+let dragStartY = 0;
+let currentTranslateY = 0;
+
 let currentCategory = 'all';
 let currentSearchQuery = '';
 let currentBrandId = null; // ✅ 현재 선택된 브랜드 ID
@@ -469,7 +473,12 @@ function openSheet(brandId, itemId) {
   const overlay = document.getElementById('overlay');
   const sheet = document.getElementById('bottom-sheet');
   overlay && overlay.classList.remove('hidden');
-  sheet && sheet.classList.add('active');
+
+  if (sheet) {
+    sheet.style.transition = 'transform 0.3s ease-out';
+    sheet.style.transform  = '';    // 항상 0 기준에서 시작
+    sheet.classList.add('active');
+  }
 }
 
 
@@ -601,12 +610,92 @@ function closeSheet() {
   const overlay = document.getElementById('overlay');
   const sheet = document.getElementById('bottom-sheet');
   overlay && overlay.classList.add('hidden');
-  sheet && sheet.classList.remove('active');
+  if (sheet) {
+    sheet.classList.remove('active');
+    sheet.style.transform = '';       // ← drag 때 준 translateY 제거
+    sheet.style.transition = '';      // ← transition 원복
+  }
 
   selectedOptions = {};
   countOptions = {};
 
   document.body.style.overflow = '';
+}
+
+function initBottomSheetDrag() {
+  const sheet  = document.getElementById('bottom-sheet');
+  const handle = document.getElementById('sheet-handle');
+  if (!sheet || !handle) return;
+
+  const startDrag = (clientY) => {
+    isDraggingSheet = true;
+    dragStartY = clientY;
+    currentTranslateY = 0;
+    // 드래그 중에는 부드럽게 따라오도록 transition 끔
+    sheet.style.transition = 'none';
+  };
+
+  const onDragMove = (clientY) => {
+    if (!isDraggingSheet) return;
+
+    const deltaY = clientY - dragStartY;
+    if (deltaY <= 0) return;              // 위로는 안 끌리게
+
+    currentTranslateY = deltaY;
+    sheet.style.transform = `translateY(${deltaY}px)`;
+  };
+
+  const endDrag = () => {
+    if (!isDraggingSheet) return;
+    isDraggingSheet = false;
+
+    const threshold = sheet.offsetHeight * 0.25; // 25% 이상 내리면 닫기
+    sheet.style.transition = 'transform 0.25s ease-out';
+
+    if (currentTranslateY > threshold) {
+      // 밑으로 쭉 내려보내고 나서 closeSheet 호출
+      sheet.style.transform = 'translateY(100%)';
+      setTimeout(() => {
+        closeSheet();
+      }, 220);
+    } else {
+      // 다시 제자리로 튕겨 올라가게
+      sheet.style.transform = 'translateY(0)';
+    }
+  };
+
+  // ===== 마우스 이벤트 =====
+  handle.addEventListener('mousedown', (e) => {
+    e.stopPropagation();
+    startDrag(e.clientY);
+  });
+
+  window.addEventListener('mousemove', (e) => {
+    if (!isDraggingSheet) return;
+    onDragMove(e.clientY);
+  });
+
+  window.addEventListener('mouseup', () => {
+    endDrag();
+  });
+
+  // ===== 터치 이벤트 =====
+  handle.addEventListener('touchstart', (e) => {
+    e.stopPropagation();
+    const touch = e.touches[0];
+    startDrag(touch.clientY);
+  }, { passive: true });
+
+  window.addEventListener('touchmove', (e) => {
+    if (!isDraggingSheet) return;
+    const touch = e.touches[0];
+    onDragMove(touch.clientY);
+    e.preventDefault();  // 화면 전체 스크롤 방지
+  }, { passive: false });
+
+  window.addEventListener('touchend', () => {
+    endDrag();
+  });
 }
 
 /**
@@ -689,6 +778,8 @@ document.addEventListener('DOMContentLoaded', () => {
     console.error('메뉴 데이터 로딩 중 오류:', err);
     renderApp(currentCategory, currentSearchQuery);
   });
+
+  initBottomSheetDrag();
 });
 
 document.addEventListener('keydown', (e) => {
