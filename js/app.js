@@ -444,6 +444,10 @@ function openSheet(brandId, itemId) {
   overlay && overlay.classList.remove('hidden');
   sheet && sheet.classList.add('active');
 
+  if (sheet) {
+    sheet.scrollTop = 0;
+  }
+  
   document.body.classList.add('body-lock');
 }
 
